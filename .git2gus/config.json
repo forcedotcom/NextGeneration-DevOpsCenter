@@ -1,7 +1,7 @@
 {
   "productTag": "a1aEE000001E5C9YAK",
   "issueTypeLabels": {
-    "feature": "USER STORY",
+    "type:feature": "USER STORY",
     "type:bug": "BUG P3",
     "type:security": "BUG P2",
     "type:feedback": "",
