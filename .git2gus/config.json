@@ -3,9 +3,7 @@
   "issueTypeLabels": {
     "type:feature": "USER STORY",
     "type:bug": "BUG P3",
-    "type:security": "BUG P2",
-    "type:feedback": "",
-    "status:duplicate": "",
+    "type:security": "BUG P2"
   },
   "defaultBuild": "main",
   "hideWorkItemUrl": "true",
