@@ -24,7 +24,7 @@ jobs:
                   "fields": [
                     {
                       "title": "Action",
-                      "value": "${{ github.event.action }}",
+                      "value": "${{ github.event_name == 'issue_comment' && 'New Comment' || github.event.action }}",
                       "short": true
                     },
                     {
@@ -38,8 +38,13 @@ jobs:
                       "short": false
                     },
                     {
+                      "title": "Comment",
+                      "value": "${{ github.event_name == 'issue_comment' && github.event.comment.body || 'N/A' }}",
+                      "short": false
+                    },
+                    {
                       "title": "Link",
-                      "value": "${{ github.event.issue.html_url }}",
+                      "value": "${{ github.event_name == 'issue_comment' && github.event.comment.html_url || github.event.issue.html_url }}",
                       "short": false
                     }
                   ]
