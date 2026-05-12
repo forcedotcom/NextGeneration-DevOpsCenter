@@ -17,14 +17,14 @@ jobs:
           webhook-type: incoming-webhook
           payload: |
             {
-              "text": "*GitHub: ${{ github.event_name }}* on `${{ github.repository }}`",
+              "text": "*GitHub Issue Update* on `${{ github.repository }}`",
               "attachments": [
                 {
-                  "color": "${{ github.event_name == 'issues' && github.event.action == 'closed' && '#d73a4a' || github.event_name == 'pull_request' && '#0075ca' || '#36a64f' }}",
+                  "color": "${{ github.event.action == 'closed' && '#d73a4a' || github.event.action == 'opened' && '#36a64f' || '#e8a404' }}",
                   "fields": [
                     {
-                      "title": "Event",
-                      "value": "${{ github.event_name }} — ${{ github.event.action }}",
+                      "title": "Action",
+                      "value": "${{ github.event.action }}",
                       "short": true
                     },
                     {
@@ -33,13 +33,13 @@ jobs:
                       "short": true
                     },
                     {
-                      "title": "Title",
-                      "value": "${{ github.event.pull_request.title || github.event.issue.title || 'N/A' }}",
+                      "title": "Issue Title",
+                      "value": "${{ github.event.issue.title }}",
                       "short": false
                     },
                     {
                       "title": "Link",
-                      "value": "${{ github.event.pull_request.html_url || github.event.issue.html_url || github.event.comment.html_url }}",
+                      "value": "${{ github.event.issue.html_url }}",
                       "short": false
                     }
                   ]
