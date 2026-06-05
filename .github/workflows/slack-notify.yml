@@ -1,0 +1,82 @@
+name: Slack Notifications
+
+on:
+  issues:
+    types:
+      - opened
+      - closed
+      - reopened
+
+  issue_comment:
+    types:
+      - created
+      - edited
+      - deleted
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: slack-notify-${{ github.event.issue.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Truncate body
+        id: truncate
+        continue-on-error: true
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "issue_comment" ]; then
+            RAW="$COMMENT_BODY"
+          else
+            RAW="$ISSUE_BODY"
+          fi
+          TRUNCATED=$(echo "$RAW" | tr '\n' ' ' | tr -s ' ' | cut -d' ' -f1-10 || echo "")
+          echo "body=${TRUNCATED:-}" >> $GITHUB_OUTPUT
+          TRUNCATED_TITLE=$(echo "$ISSUE_TITLE" | tr '\n' ' ' | tr -s ' ' | cut -d' ' -f1-10 || echo "")
+          echo "title=${TRUNCATED_TITLE:-}" >> $GITHUB_OUTPUT
+
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "*GitHub Issue Update* on `${{ github.repository }}`",
+              "attachments": [
+                {
+                  "color": "${{ github.event.action == 'closed' && '#d73a4a' || github.event.action == 'opened' && '#36a64f' || '#e8a404' }}",
+                  "fields": [
+                    {
+                      "title": "Action",
+                      "value": "${{ github.event_name == 'issue_comment' && 'New Comment' || github.event.action }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Triggered by",
+                      "value": ${{ toJSON(github.actor) }},
+                      "short": true
+                    },
+                    {
+                      "title": "Title",
+                      "value": ${{ toJSON(steps.truncate.outputs.title) }},
+                      "short": false
+                    },
+                    {
+                      "title": "Body",
+                      "value": ${{ toJSON(steps.truncate.outputs.body) }},
+                      "short": false
+                    },
+                    {
+                      "title": "Link",
+                      "value": "${{ github.event_name == 'issue_comment' && github.event.comment.html_url || github.event.issue.html_url }}",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
